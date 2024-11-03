@@ -1,0 +1,46 @@
+services:
+  # frontend:
+  #   build:
+  #     context: ./frontend
+
+  #   depends_on:
+  #     couchdb:
+  #       condition: service_healthy
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=development
+  #   volumes:
+  #     - ./frontend:/app
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      couchdb:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend:/app
+    command: npm run mon
+
+  couchdb:
+    image: couchdb:latest
+    ports:
+      - "5984:5984"
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=admin
+    volumes:
+      - couchdb_data:/opt/couchdb/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5984/_up"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  couchdb_data:
